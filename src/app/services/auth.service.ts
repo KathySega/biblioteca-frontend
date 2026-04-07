@@ -1,12 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { RegistroRequest } from '../models/registro-request.model';
 import { Usuario } from '../models/usuario.model';
 
+interface Credentials {
+  cedula: string;
+  password: string;
+  rol: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
+  private credentials = signal<Credentials | null>(null);
 
   constructor(private http: HttpClient) {}
 
@@ -15,34 +23,36 @@ export class AuthService {
   }
 
   login(cedula: string, password: string): void {
-    sessionStorage.setItem('cedula', cedula);
-    sessionStorage.setItem('password', password);
+    this.credentials.set({ cedula, password, rol: '' });
   }
 
   setRol(rol: string): void {
-    sessionStorage.setItem('rol', rol);
+    const current = this.credentials();
+    if (current) {
+      this.credentials.set({ ...current, rol });
+    }
   }
 
   logout(): void {
-    sessionStorage.clear();
+    this.credentials.set(null);
   }
 
   isAuthenticated(): boolean {
-    return !!sessionStorage.getItem('cedula') && !!sessionStorage.getItem('password');
+    const c = this.credentials();
+    return !!c?.cedula && !!c?.password;
   }
 
   isAdmin(): boolean {
-    return sessionStorage.getItem('rol') === 'ROLE_ADMIN';
+    return this.credentials()?.rol === 'ROLE_ADMIN';
   }
 
   getCedula(): string | null {
-    return sessionStorage.getItem('cedula');
+    return this.credentials()?.cedula ?? null;
   }
 
   getAuthHeaders(): HttpHeaders {
-    const cedula = sessionStorage.getItem('cedula');
-    const password = sessionStorage.getItem('password');
-    const token = btoa(`${cedula}:${password}`);
+    const c = this.credentials();
+    const token = btoa(`${c?.cedula}:${c?.password}`);
     return new HttpHeaders({ Authorization: `Basic ${token}` });
   }
 }

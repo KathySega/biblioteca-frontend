@@ -1,27 +1,76 @@
-# BibliotecaFrontend
+# Biblioteca Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.1.3.
+Angular 17 frontend for the Biblioteca library management system. Communicates with the [biblioteca](https://github.com/KathySega/biblioteca) Spring Boot backend.
 
-## Development server
+## Features
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- User registration and JWT-based login
+- Browse and search books
+- View book details
+- Borrow and return books (loans)
+- Admin-only: create and edit books, create loans
+- Route guards for authentication and admin role
 
-## Code scaffolding
+## Tech Stack
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Angular 17 (standalone components, lazy loading)
+- Bootstrap 5 + Bootstrap Icons
+- RxJS
+
+## Prerequisites
+
+- Node.js 18+
+- Angular CLI 17: `npm install -g @angular/cli`
+- Backend running at `http://localhost:8081`
+
+## Getting Started
+
+```bash
+npm install
+npm start
+```
+
+Navigate to `http://localhost:4200/`. The app proxies `/api` requests to the backend at port 8081.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```bash
+npm run build
+```
 
-## Running unit tests
+Build artifacts are output to `dist/`.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Running Tests
 
-## Running end-to-end tests
+```bash
+npm test
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Project Structure
 
-## Further help
+```
+src/app/
+├── components/       # Shared components (navbar, confirm modal)
+├── guards/           # Auth and admin route guards
+├── interceptors/     # JWT auth interceptor
+├── models/           # TypeScript interfaces
+├── pages/            # Feature pages (login, registro, libros, prestamos)
+└── services/         # HTTP services (auth, libro, prestamo, modal)
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## Routes
+
+| Path | Access | Description |
+|------|--------|-------------|
+| `/login` | Public | Login |
+| `/registro` | Public | Register |
+| `/libros` | Auth | Book list |
+| `/libros/:id` | Auth | Book detail |
+| `/libros/nuevo` | Admin | Create book |
+| `/libros/:id/editar` | Admin | Edit book |
+| `/prestamos` | Auth | Loan list |
+| `/prestamos/nuevo` | Admin | Create loan |
+
+## Backend
+
+See [biblioteca](https://github.com/KathySega/biblioteca) for the Spring Boot REST API.
