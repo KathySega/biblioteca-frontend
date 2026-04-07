@@ -1,0 +1,101 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-0 fw-bold"><i class="bi bi-arrow-left-right me-2 text-primary"></i>Préstamos activos</h3>
+      @if (!authService.isAdmin()) {
+        <small class="text-muted">Tus préstamos registrados</small>
+      }
+    </div>
+    @if (authService.isAdmin()) {
+      <a routerLink="/prestamos/nuevo" class="btn btn-primary px-4">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo préstamo
+      </a>
+    }
+  </div>
+
+  @if (authService.isAdmin()) {
+    <div class="search-card mb-4 p-3 rounded-3 bg-white shadow-sm border">
+      <label class="form-label fw-semibold mb-2">
+        <i class="bi bi-search me-1"></i>Buscar por cédula del usuario
+      </label>
+      <div class="row g-2 align-items-center">
+        <div class="col">
+          <input type="text" class="form-control border-0 bg-light" placeholder="Ingrese la cédula..."
+                 [(ngModel)]="cedulaBusqueda" (keyup.enter)="buscar()">
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary px-4" (click)="buscar()" [disabled]="!cedulaBusqueda.trim()">
+            <i class="bi bi-search me-1"></i>Buscar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert alert-danger py-2">
+      <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+    </div>
+  }
+  @if (successMsg) {
+    <div class="alert alert-success py-2">
+      <i class="bi bi-check-circle me-1"></i>{{ successMsg }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (prestamos.length === 0 && !authService.isAdmin()) {
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+      <p class="fs-5">No tienes préstamos activos.</p>
+    </div>
+  } @else if (prestamos.length > 0) {
+    <div class="bg-white rounded-3 shadow-sm overflow-hidden border">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr class="table-header-custom">
+            <th class="ps-4 py-3">#</th>
+            <th class="py-3"><i class="bi bi-book me-1"></i>Libro</th>
+            <th class="py-3"><i class="bi bi-calendar me-1"></i>Fecha préstamo</th>
+            <th class="py-3">Estado</th>
+            @if (authService.isAdmin()) {
+              <th class="py-3 text-center pe-4">Acciones</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of prestamos; track p.prestamoId) {
+            <tr class="libro-row">
+              <td class="ps-4 text-muted">{{ p.prestamoId }}</td>
+              <td class="fw-semibold">{{ p.libro?.titulo ?? '—' }}</td>
+              <td class="text-muted">{{ p.fechaPrestamo }}</td>
+              <td>
+                <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
+                      [class.bg-warning]="p.estado === 'ACTIVO'"
+                      [class.bg-opacity-25]="p.estado === 'ACTIVO'"
+                      [class.text-warning-emphasis]="p.estado === 'ACTIVO'"
+                      [class.bg-success]="p.estado === 'DEVUELTO'"
+                      [class.bg-opacity-10]="p.estado === 'DEVUELTO'"
+                      [class.text-success]="p.estado === 'DEVUELTO'"
+                      style="font-size:0.78rem; font-weight:600;">
+                  <i class="bi" [class.bi-clock]="p.estado === 'ACTIVO'" [class.bi-check-circle]="p.estado === 'DEVUELTO'"></i>
+                  {{ p.estado }}
+                </span>
+              </td>
+              @if (authService.isAdmin()) {
+                <td class="text-center pe-4">
+                  @if (p.estado === 'ACTIVO') {
+                    <button class="btn btn-sm btn-prestar" (click)="devolver(p.prestamoId!)">
+                      <i class="bi bi-arrow-return-left me-1"></i>Devolver
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

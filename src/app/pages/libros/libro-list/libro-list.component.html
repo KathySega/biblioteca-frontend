@@ -1,0 +1,103 @@
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-0 fw-bold"><i class="bi bi-journals me-2 text-primary"></i>Catálogo de libros</h3>
+      <small class="text-muted">{{ libros.length }} libro(s) encontrado(s)</small>
+    </div>
+    @if (authService.isAdmin()) {
+      <a routerLink="/libros/nuevo" class="btn btn-primary px-4">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo libro
+      </a>
+    }
+  </div>
+
+  <div class="search-card mb-4 p-3 rounded-3 bg-white shadow-sm border">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <input type="text" class="form-control form-control-lg border-0 bg-light"
+               placeholder="Buscar por título..."
+               [(ngModel)]="searchTitulo" (keyup.enter)="buscar()">
+      </div>
+      <div class="col-auto d-flex gap-2">
+        <button class="btn btn-primary px-4" (click)="buscar()">
+          <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        <button class="btn btn-light border" (click)="limpiar()">
+          <i class="bi bi-x-lg me-1"></i>Limpiar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger rounded-3">
+      <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (libros.length === 0) {
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-search fs-1 d-block mb-2"></i>
+      <p class="fs-5">No se encontraron libros.</p>
+    </div>
+  } @else {
+    <div class="bg-white rounded-3 shadow-sm overflow-hidden border">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr class="table-header-custom">
+            <th class="ps-4 py-3">Título</th>
+            <th class="py-3">Autor</th>
+            <th class="py-3">ISBN</th>
+            <th class="py-3">Categoría</th>
+            <th class="py-3 text-center">Stock</th>
+            <th class="py-3 text-center pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (libro of libros; track libro.id) {
+            <tr class="libro-row">
+              <td class="ps-4 fw-semibold text-dark">{{ libro.titulo }}</td>
+              <td class="text-muted"><i class="bi bi-person me-1"></i>{{ libro.autor }}</td>
+              <td><span class="isbn-badge">{{ libro.isbn }}</span></td>
+              <td>
+                <span class="categoria-badge categoria-{{ libro.categoria | lowercase }}">
+                  {{ libro.categoria }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="stock-badge"
+                      [class.stock-ok]="libro.cantidadDisponible > 2"
+                      [class.stock-low]="libro.cantidadDisponible > 0 && libro.cantidadDisponible <= 2"
+                      [class.stock-out]="libro.cantidadDisponible === 0">
+                  {{ libro.cantidadDisponible }}
+                </span>
+              </td>
+              <td class="text-center pe-4">
+                <div class="d-flex gap-1 justify-content-center">
+                  <a [routerLink]="['/libros', libro.id]" class="btn btn-sm btn-ver">
+                    <i class="bi bi-eye me-1"></i>Ver
+                  </a>
+                  @if (authService.isAdmin()) {
+                    <a [routerLink]="['/prestamos/nuevo']" [queryParams]="{ libroId: libro.id }"
+                       class="btn btn-sm btn-prestar"
+                       [class.disabled]="libro.cantidadDisponible === 0">
+                      <i class="bi bi-bookmark-plus me-1"></i>Prestar
+                    </a>
+                    <a [routerLink]="['/libros', libro.id, 'editar']" class="btn btn-sm btn-editar">
+                      <i class="bi bi-pencil me-1"></i>Editar
+                    </a>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,73 @@
+<div class="container py-4">
+  @if (loading) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (error) {
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
+  } @else if (libro) {
+    <div class="row justify-content-center">
+      <div class="col-md-7">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-book me-2 text-primary"></i>{{ libro.titulo }}</h5>
+            <span class="categoria-badge categoria-{{ libro.categoria | lowercase }}">{{ libro.categoria }}</span>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4"><i class="bi bi-person me-1 text-muted"></i>Autor</dt>
+              <dd class="col-sm-8">{{ libro.autor }}</dd>
+              <dt class="col-sm-4"><i class="bi bi-upc me-1 text-muted"></i>ISBN</dt>
+              <dd class="col-sm-8"><span class="isbn-badge">{{ libro.isbn }}</span></dd>
+              <dt class="col-sm-4"><i class="bi bi-stack me-1 text-muted"></i>Disponibles</dt>
+              <dd class="col-sm-8">
+                <span class="stock-badge"
+                      [class.stock-ok]="libro.cantidadDisponible > 2"
+                      [class.stock-low]="libro.cantidadDisponible > 0 && libro.cantidadDisponible <= 2"
+                      [class.stock-out]="libro.cantidadDisponible === 0">
+                  {{ libro.cantidadDisponible }}
+                </span>
+              </dd>
+            </dl>
+
+            @if (authService.isAdmin()) {
+              <hr>
+              <p class="mb-2 fw-semibold"><i class="bi bi-sliders me-1"></i>Ajustar stock</p>
+              @if (stockMsg) {
+                <div class="alert alert-info py-1 small">
+                  <i class="bi bi-check-circle me-1"></i>{{ stockMsg }}
+                </div>
+              }
+              <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-danger btn-sm px-3"
+                        (click)="ajustarStock(-1)"
+                        [disabled]="libro.cantidadDisponible === 0 || stockLoading">
+                  <i class="bi bi-dash-lg"></i>
+                </button>
+                <span class="fs-5 fw-bold">{{ libro.cantidadDisponible }}</span>
+                <button class="btn btn-outline-success btn-sm px-3"
+                        (click)="ajustarStock(1)"
+                        [disabled]="stockLoading">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
+            }
+          </div>
+          <div class="card-footer d-flex gap-2">
+            <a routerLink="/libros" class="btn btn-secondary btn-sm">
+              <i class="bi bi-arrow-left me-1"></i>Volver
+            </a>
+            @if (authService.isAdmin()) {
+              <a [routerLink]="['/prestamos/nuevo']" [queryParams]="{ libroId: libro.id }"
+                 class="btn btn-success btn-sm"
+                 [class.disabled]="libro.cantidadDisponible === 0">
+                <i class="bi bi-bookmark-plus me-1"></i>Solicitar préstamo
+              </a>
+              <a [routerLink]="['/libros', libro.id, 'editar']" class="btn btn-warning btn-sm">
+                <i class="bi bi-pencil me-1"></i>Editar
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
